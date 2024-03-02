@@ -18,7 +18,7 @@ Generate a new image that combines features from your face and the face from ani
 npm i npm@10.2.4
 
 # library install
-cd hackathon/client
+cd face_converter/client
 npm install # !!! 꼭 client 폴더위치에서만 실행 !!!
 ```
 
@@ -29,7 +29,7 @@ npm install # !!! 꼭 client 폴더위치에서만 실행 !!!
 brew update && brew install python@3.12
 
 #virtual envrionment
-cd hackathon/server
+cd face_cconverter/server
 python3.12 -m venv venv #생성
 source ./venv/bin/activate #접속
 
@@ -42,7 +42,7 @@ pip install -r requirements.txt
 
 ```bash
 # client(react)
-cd hackathon/client && npm start
+cd face_converter/client && npm start
 
 # server(django)
 cd hackathon/server
