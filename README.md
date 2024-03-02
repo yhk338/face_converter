@@ -45,7 +45,7 @@ pip install -r requirements.txt
 cd face_converter/client && npm start
 
 # server(django)
-cd hackathon/server
+cd face_converter/server
 python manage.py makemigrations # only when changes made in model.py
 python manage.py migrate # only when changes made in model.py
 python manage.py runserver
