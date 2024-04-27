@@ -1,9 +1,18 @@
 import logo from './logo.svg';
+import React, { useState } from 'react';
 import './App.css';
+import './styles.css';
+import Header from './components/Header';
+import ImageInput from './components/ImageInput';
+import ImageOutput from './components/ImageOutput';
+
 
 function App() {
   return (
     <div className="App">
+      <Header />
+      <ImageInput />
+      <ImageOutput />
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
         <p>
