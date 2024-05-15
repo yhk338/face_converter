@@ -1,25 +1,35 @@
-from django.shortcuts import render
 import cv2
-import matplotlib.pyplot as plt
-from deepface import DeepFace
 import numpy as np
+from deepface import DeepFace
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import os
+
+from django.shortcuts import render
+
+def upload_image(request):
+    return render(request, 'upload.html')
+
 
 @csrf_exempt
 def process_image(request):
     if request.method == 'POST' and request.FILES['image']:
         image_file = request.FILES['image']
-        image_path = f'media/{image_file.name}'
+        # file name is fixed, it needs to change from real file name 
+        image_path = 'photo.jpeg'
+        BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        age_prototxt_path = os.path.join(BASE_DIR, 'myapp/pre_model', 'age.prototxt')
+        dex_chalearn_iccv2015_path = os.path.join(BASE_DIR, 'myapp/pre_model', 'dex_chalearn_iccv2015.caffemodel')
+        gender_prototxt_path = os.path.join(BASE_DIR, 'myapp/pre_model', 'gender.prototxt')
+        gender_caffemodel_path = os.path.join(BASE_DIR, 'myapp/pre_model', 'gender.caffemodel')
         
         with open(image_path, 'wb+') as destination:
             for chunk in image_file.chunks():
                 destination.write(chunk)
         
         # Load the models
-        age_model = cv2.dnn.readNetFromCaffe("age.prototxt", "dex_chalearn_iccv2015.caffemodel")
-        gender_model = cv2.dnn.readNetFromCaffe("gender.prototxt", "gender.caffemodel")
+        age_model = cv2.dnn.readNetFromCaffe(age_prototxt_path, dex_chalearn_iccv2015_path)
+        gender_model = cv2.dnn.readNetFromCaffe(gender_prototxt_path, gender_caffemodel_path)
         
         # Read and process the image
         img = cv2.imread(image_path)
@@ -62,6 +72,3 @@ def process_image(request):
         })
     
     return JsonResponse({'error': 'Invalid request'}, status=400)
-
-def upload_image(request):
-    return render(request, 'upload.html')
