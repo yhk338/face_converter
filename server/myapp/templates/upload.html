@@ -1,43 +1,72 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>Upload Image</title>
-    </head>
-    <body>
-        <h1>Upload an Image</h1>
-        <form action="{% url 'process_image' %}" method="post" enctype="multipart/form-data" id="upload-form">
-            {% csrf_token %}
-            <input type="file" name="image" required>
-            <button type="submit">Upload</button>
-        </form>
+<head>
+    <title>Upload Image</title>
+</head>
+<body>
+    <h1>Upload an Image</h1>
+    <form action="{% url 'process_image' %}" method="post" enctype="multipart/form-data" id="upload-form">
+        {% csrf_token %}
+        <input type="file" name="image" id="image-input" required>
+        <button type="submit">Upload</button>
+    </form>
+    <div id="result-message"></div>
+    <img id="uploaded-image" style="display: none; max-width: 100%; margin-top: 20px;" />
+    <scri
 
-        <div id="result-message"></div>
-        <script>
-            document.getElementById('upload-form').addEventListener('submit', function(event) {
-                event.preventDefault();
 
-                var formData = new FormData(this);
 
-                fetch(this.action, {
-                    method: this.method,
-                    body: formData,
-                    headers: {
-                        'X-CSRFToken': document.getElementsByName('csrfmiddlewaretoken')[0].value
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.age && data.gender) {
-                        document.getElementById('result-message').innerHTML = `Age: ${data.age}, Gender: ${data.gender}`;
-                    } else {
-                        document.getElementById('result-message').textContent = 'Error: Unable to process image.';
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    document.getElementById('result-message').textContent = 'Error: ' + error.message;
-                });
+
+
+11:37
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Upload Image</title>
+</head>
+<body>
+    <h1>Upload an Image</h1>
+    <form action="{% url 'process_image' %}" method="post" enctype="multipart/form-data" id="upload-form">
+        {% csrf_token %}
+        <input type="file" name="image" id="image-input" required>
+        <button type="submit">Upload</button>
+    </form>
+    <div id="result-message"></div>
+    <img id="uploaded-image" style="display: none; max-width: 100%; margin-top: 20px;" />
+    <script>
+        document.getElementById('upload-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            var formData = new FormData(this);
+            var imageInput = document.getElementById('image-input');
+            var imageFile = imageInput.files[0];
+            if (imageFile) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('uploaded-image').src = e.target.result;
+                    document.getElementById('uploaded-image').style.display = 'block';
+                };
+                reader.readAsDataURL(imageFile);
+            }
+            fetch(this.action, {
+                method: this.method,
+                body: formData,
+                headers: {
+                    'X-CSRFToken': document.getElementsByName('csrfmiddlewaretoken')[0].value
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.age && data.gender) {
+                    document.getElementById('result-message').innerHTML = `Age: ${data.age}, Gender: ${data.gender}`;
+                } else {
+                    document.getElementById('result-message').textContent = 'Error: Unable to process image.';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('result-message').textContent = 'Error: ' + error.message;
             });
-        </script>
-    </body>
+        });
+    </script>
+</body>
 </html>
