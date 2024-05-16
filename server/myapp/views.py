@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.shortcuts import render
 import cv2
 import matplotlib.pyplot as plt
@@ -17,9 +18,15 @@ def process_image(request):
             for chunk in image_file.chunks():
                 destination.write(chunk)
         
+        static_dir = os.path.join(settings.BASE_DIR, 'static')
+        age_prototxt_path = os.path.join(static_dir, 'age.prototxt')
+        gender_prototxt_path = os.path.join(static_dir, 'gender.prototxt')
+        dex_chalearn_model_path = os.path.join(static_dir, 'dex_chalearn_iccv2015.caffemodel')
+        gender_model_path = os.path.join(static_dir, 'gender.caffemodel')
+
         # Load the models
-        age_model = cv2.dnn.readNetFromCaffe("age.prototxt", "dex_chalearn_iccv2015.caffemodel")
-        gender_model = cv2.dnn.readNetFromCaffe("gender.prototxt", "gender.caffemodel")
+        age_model = cv2.dnn.readNetFromCaffe(age_prototxt_path, dex_chalearn_model_path)
+        gender_model = cv2.dnn.readNetFromCaffe(gender_prototxt_path, gender_model_path)
         
         # Read and process the image
         img = cv2.imread(image_path)
