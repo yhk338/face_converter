@@ -12,27 +12,6 @@
     </form>
     <div id="result-message"></div>
     <img id="uploaded-image" style="display: none; max-width: 100%; margin-top: 20px;" />
-    <scri
-
-
-
-
-
-11:37
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Upload Image</title>
-</head>
-<body>
-    <h1>Upload an Image</h1>
-    <form action="{% url 'process_image' %}" method="post" enctype="multipart/form-data" id="upload-form">
-        {% csrf_token %}
-        <input type="file" name="image" id="image-input" required>
-        <button type="submit">Upload</button>
-    </form>
-    <div id="result-message"></div>
-    <img id="uploaded-image" style="display: none; max-width: 100%; margin-top: 20px;" />
     <script>
         document.getElementById('upload-form').addEventListener('submit', function(event) {
             event.preventDefault();
