@@ -65,7 +65,6 @@ def process_image(request):
         return JsonResponse({
             'age': age,
             'gender': ret_gender,
-            'demography': demography[0]["gender"]
         })
     
     return JsonResponse({'error': 'Invalid request'}, status=400)

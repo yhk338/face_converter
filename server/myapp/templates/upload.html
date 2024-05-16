@@ -1,14 +1,43 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <title>Upload Image</title>
-</head>
-<body>
-    <h1>Upload an Image</h1>
-    <form action="/process_image/" method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        <input type="file" name="image" required>
-        <button type="submit">Upload</button>
-    </form>
-</body>
+    <head>
+        <title>Upload Image</title>
+    </head>
+    <body>
+        <h1>Upload an Image</h1>
+        <form action="{% url 'process_image' %}" method="post" enctype="multipart/form-data" id="upload-form">
+            {% csrf_token %}
+            <input type="file" name="image" required>
+            <button type="submit">Upload</button>
+        </form>
+
+        <div id="result-message"></div>
+        <script>
+            document.getElementById('upload-form').addEventListener('submit', function(event) {
+                event.preventDefault();
+
+                var formData = new FormData(this);
+
+                fetch(this.action, {
+                    method: this.method,
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': document.getElementsByName('csrfmiddlewaretoken')[0].value
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.age && data.gender) {
+                        document.getElementById('result-message').innerHTML = `Age: ${data.age}, Gender: ${data.gender}`;
+                    } else {
+                        document.getElementById('result-message').textContent = 'Error: Unable to process image.';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('result-message').textContent = 'Error: ' + error.message;
+                });
+            });
+        </script>
+    </body>
 </html>
