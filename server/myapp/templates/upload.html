@@ -210,6 +210,7 @@
                         if (imageCounter === 1) {
                             var progress1 = document.getElementById("progress-message-1")
                             progress1.textContent = "Finished"
+                            
                         } else {
                             var progress1 = document.getElementById("progress-message-2")
                             progress1.textContent = "Finished"
@@ -239,6 +240,7 @@
                                 winnerMessage.textContent = 'Both persons have the same age.';
                             }
                             // Disable file input and submit button
+                            imageInput.value = '';
                             imageInput.disabled = true;
                             document.getElementById('upload-button').disabled = true;
                             // Show retry message
@@ -255,6 +257,7 @@
                 };
                 reader.readAsDataURL(imageFile);
             }
+            imageInput.value = '';
         });
 
         // Reset button functionality
