@@ -39,10 +39,9 @@ def process_image(request):
         
         faces = detect_faces(img)
         for x, y, w, h in faces:
-            detected_face = img[int(y):int(y+h), int(x):int(x+w)]  # Assigning value to detected_face
+            detected_face = img[int(y):int(y+h), int(x):int(x+w)]
         
-        detected_face = cv2.resize(detected_face, (224, 224))  # Now detected_face is used after being assigned
-        
+        detected_face = cv2.resize(detected_face, (224, 224))
         img_blob = cv2.dnn.blobFromImage(detected_face)
         
         age_model.setInput(img_blob)

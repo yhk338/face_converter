@@ -2,66 +2,165 @@
 <html>
 <head>
     <title>Upload Image</title>
+    <style>
+        #images-container {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .image-container {
+            text-align: center;
+        }
+
+        .result-container {
+            width: 100%;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .uploaded-image {
+            width: 4cm;
+            height: 4cm;
+            margin-bottom: 10px;
+        }
+
+        .vs-text {
+            font-size: 24px;
+            margin: 0 20px;
+        }
+
+        .result-message {
+            font-size: 16px;
+            margin-top: 5px;
+        }
+
+        .winner-message {
+            font-size: 20px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+
+        #retry-message {
+            font-size: 14px;
+            color: #888;
+            margin-top: 10px;
+        }
+    </style>
 </head>
 <body>
     <h1>Upload an Image</h1>
     <form action="{% url 'process_image' %}" method="post" enctype="multipart/form-data" id="upload-form">
         {% csrf_token %}
-        <input type="file" name="image" required>
-        <button type="submit">Upload</button>
+        <input type="file" name="image" id="image-input" required>
+        <button type="submit" id="upload-button">Upload</button>
+        <button type="button" id="reset-button">Reset</button>
     </form>
-
-    <div id="result-message"></div>
-    <div id="progress-message" style="display: none;">Processing...</div> <!-- Initially hidden -->
-
+    <div id="images-container"></div>
+    <div id="winner-message" class="winner-message"></div>
+    <div id="retry-message"></div>
     <script>
+        var imageCounter = 0;
+
         document.getElementById('upload-form').addEventListener('submit', function(event) {
             event.preventDefault();
-
-            // Clear the previous result message
-            document.getElementById('result-message').textContent = '';
-            document.getElementById('progress-message').textContent = '';
-
-
             var formData = new FormData(this);
+            var imageInput = document.getElementById('image-input');
+            var imageFile = imageInput.files[0];
+            if (imageFile) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    var uploadedImage = document.createElement('img');
+                    uploadedImage.src = e.target.result;
+                    uploadedImage.className = 'uploaded-image';
+                    var imageContainer = document.createElement('div');
+                    imageContainer.className = 'image-container';
+                    imageContainer.appendChild(uploadedImage);
+                    var imagesContainer = document.getElementById('images-container');
+                    
+                    // Add VS text if there's already one uploaded image
+                    if (imageCounter === 1) {
+                        var vsText = document.createElement('div');
+                        vsText.textContent = 'VS';
+                        vsText.className = 'vs-text';
+                        imagesContainer.appendChild(vsText);
+                    }
+                    
+                    imagesContainer.appendChild(imageContainer);
 
-            document.getElementById('progress-message').style.display = 'block';
+                    imageCounter++;
+                    if (imageCounter >= 2) {
+                        // Disable file input and submit button
+                        imageInput.disabled = true;
+                        document.getElementById('upload-button').disabled = true;
+                        // Show retry message
+                        document.getElementById('retry-message').textContent = 'If you want to try again, please click the reset button.';
+                    }
 
-            // Start updating progress message immediately after making the request
-            var progressMessageDiv = document.getElementById('progress-message');
-            var progressCounter = 0;
-            var progressInterval = setInterval(function() {
-                progressCounter += 10; // Update the progress by 10% every interval
-                progressMessageDiv.textContent = 'Processing... ' + progressCounter + '%';
-                if (progressCounter >= 95) {
-                    progressMessageDiv.textContent = 'Processing... ' + '95%';
-                    clearInterval(progressInterval); // Stop updating when progress reaches 100%
-                }
-            }, 1000); // Update every second (adjust as needed)
-
-            fetch(this.action, {
-                method: this.method,
-                body: formData,
-                headers: {
-                    'X-CSRFToken': document.getElementsByName('csrfmiddlewaretoken')[0].value
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                // Display the result once processing is complete
-                document.getElementById('progress-message').textContent = '';
-                if (data.age && data.gender) {
-                    document.getElementById('result-message').innerHTML = `Age: ${data.age}, Gender: ${data.gender}`;
-                } else {
-                    document.getElementById('result-message').textContent = 'Error: Unable to process image.';
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                document.getElementById('result-message').textContent = 'Error: ' + error.message;
-            });
+                    fetch(event.target.action, {
+                        method: event.target.method,
+                        body: formData,
+                        headers: {
+                            'X-CSRFToken': document.getElementsByName('csrfmiddlewaretoken')[0].value
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        var resultContainer = document.createElement('div');
+                        resultContainer.className = 'result-container';
+                        var resultMessage = document.createElement('div');
+                        resultMessage.className = 'result-message';
+                        if (data.age && data.gender) {
+                            resultMessage.textContent = `Age: ${data.age}, Gender: ${data.gender}`;
+                        } else {
+                            resultMessage.textContent = 'Error: Unable to process image.';
+                        }
+                        resultContainer.appendChild(resultMessage);
+                        imageContainer.appendChild(resultContainer);
+                        // Add id to the result message element
+                        resultMessage.id = 'age' + imageCounter;
+                        if (imageCounter === 2) {
+                            var winnerMessage = document.getElementById('winner-message');
+                            var age1 = parseInt(document.getElementById('age1').textContent.replace('Age: ', ''));
+                            var age2 = parseInt(document.getElementById('age2').textContent.replace('Age: ', ''));
+                            if (age1 < age2) {
+                                winnerMessage.textContent = 'The first person is younger than the second person.';
+                            } else if (age1 > age2) {
+                                winnerMessage.textContent = 'The second person is younger than the first person.';
+                            } else {
+                                winnerMessage.textContent = 'Both persons have the same age.';
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        var errorMessage = document.createElement('div');
+                        errorMessage.textContent = 'Error: ' + error.message;
+                        var imagesContainer = document.getElementById('images-container');
+                        imagesContainer.appendChild(errorMessage);
+                    });
+                };
+                reader.readAsDataURL(imageFile);
+            }
         });
 
+        // Reset button functionality
+        document.getElementById('reset-button').addEventListener('click', function() {
+            // Clear the images and results
+            var imagesContainer = document.getElementById('images-container');
+            imagesContainer.innerHTML = '';
+            // Reset the image counter
+            imageCounter = 0;
+            // Enable file input and submit button
+            var imageInput = document.getElementById('image-input');
+            imageInput.disabled = false;
+            document.getElementById('upload-button').disabled = false;
+            // Clear retry message
+            document.getElementById('retry-message').textContent = '';
+            // Clear winner message
+            document.getElementById('winner-message').textContent = '';
+        });
     </script>
 </body>
 </html>
