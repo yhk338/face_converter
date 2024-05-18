@@ -60,17 +60,28 @@
     <div id="images-container"></div>
     <div id="winner-message" class="winner-message"></div>
     <div id="retry-message"></div>
+    <div id="result-message"></div>
     <script>
         var imageCounter = 0;
 
+        
+
         document.getElementById('upload-form').addEventListener('submit', function(event) {
             event.preventDefault();
+
+            // Clear the previous result message
+            document.getElementById('result-message').textContent = '';
+
+
             var formData = new FormData(this);
             var imageInput = document.getElementById('image-input');
             var imageFile = imageInput.files[0];
             if (imageFile) {
                 var reader = new FileReader();
                 reader.onload = function(e) {
+                    document.getElementById('upload-button').disabled = true;
+                    document.getElementById('reset-button').disabled = true;
+
                     var uploadedImage = document.createElement('img');
                     uploadedImage.src = e.target.result;
                     uploadedImage.className = 'uploaded-image';
@@ -78,7 +89,14 @@
                     imageContainer.className = 'image-container';
                     imageContainer.appendChild(uploadedImage);
                     var imagesContainer = document.getElementById('images-container');
-                    
+
+                    var progressContainer = document.createElement('div')
+                    progressContainer.className = "progress-container"
+                    var progressMessage = document.createElement('div')
+                    progressMessage.className = "progress-message"
+
+                    progressContainer.appendChild(progressMessage)
+                    imageContainer.appendChild(progressContainer)
                     // Add VS text if there's already one uploaded image
                     if (imageCounter === 1) {
                         var vsText = document.createElement('div');
@@ -88,15 +106,35 @@
                     }
                     
                     imagesContainer.appendChild(imageContainer);
+                    if (imagesContainer.children.length === 1) {
+                        progressMessage.id = "progress-message-1"
+                        progressContainer.appendChild(progressMessage)
+                        imageContainer.appendChild(progressContainer)
+                        var progressCounter = 0;
+                        var progressInterval1 = setInterval(function() {
+                            progressCounter += 20; // Update the progress by 10% every interval
+                            progressMessage.textContent = 'Processing... ' + progressCounter + '%';
+                            if (progressCounter >= 95) {
+                                progressMessage.textContent = 'Almost Done ...';
+                                clearInterval(progressInterval1); // Stop updating when progress reaches 100%
+                            }
+                        }, 1000); // Update every second (adjust as needed)
+                    } else {
+                        progressMessage.id = "progress-message-2"
+                        progressContainer.appendChild(progressMessage)
+                        imageContainer.appendChild(progressContainer)
+                        var progressCounter = 0;
+                        var progressInterval2 = setInterval(function() {
+                            progressCounter += 20; // Update the progress by 10% every interval
+                            progressMessage.textContent = 'Processing... ' + progressCounter + '%';
+                            if (progressCounter >= 95) {
+                                progressMessage.textContent = 'Almost Done ...';
+                                clearInterval(progressInterval2); // Stop updating when progress reaches 100%
+                            }
+                        }, 500); // Update every second (adjust as needed)
+                    }
 
                     imageCounter++;
-                    if (imageCounter >= 2) {
-                        // Disable file input and submit button
-                        imageInput.disabled = true;
-                        document.getElementById('upload-button').disabled = true;
-                        // Show retry message
-                        document.getElementById('retry-message').textContent = 'If you want to try again, please click the reset button.';
-                    }
 
                     fetch(event.target.action, {
                         method: event.target.method,
@@ -107,6 +145,16 @@
                     })
                     .then(response => response.json())
                     .then(data => {
+                        document.getElementById('upload-button').disabled = false;
+                        document.getElementById('reset-button').disabled = false;
+
+                        if (imageCounter === 1) {
+                            var progress1 = document.getElementById("progress-message-1")
+                            progress1.textContent = "Finished"
+                        } else {
+                            var progress1 = document.getElementById("progress-message-2")
+                            progress1.textContent = "Finished"
+                        }
                         var resultContainer = document.createElement('div');
                         resultContainer.className = 'result-container';
                         var resultMessage = document.createElement('div');
@@ -131,6 +179,11 @@
                             } else {
                                 winnerMessage.textContent = 'Both persons have the same age.';
                             }
+                            // Disable file input and submit button
+                            imageInput.disabled = true;
+                            document.getElementById('upload-button').disabled = true;
+                            // Show retry message
+                            document.getElementById('retry-message').textContent = 'If you want to try again, please click the reset button.';
                         }
                     })
                     .catch(error => {
